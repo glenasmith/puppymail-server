@@ -34,8 +34,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(allowCrossDomain);
 
 app.use('/', routes);
-app.use('/users', users);
-app.use('/proxy', proxy('https://getpocket.com/', {
+app.use('/proxy/getpocket', proxy('https://getpocket.com/', {
 
   decorateRequest: function(proxyReq, originalReq) {
     // you can update headers
