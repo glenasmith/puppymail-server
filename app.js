@@ -7,7 +7,6 @@ var bodyParser = require('body-parser');
 var proxy = require('express-http-proxy');
 
 var routes = require('./routes/index');
-var users = require('./routes/users');
 
 var allowCrossDomain = function(req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
