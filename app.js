@@ -44,6 +44,17 @@ app.use('/proxy/getpocket', proxy('https://getpocket.com/', {
     //proxyReq.bodyContent = proxyReq.bodyContent.replace(/losing/, 'winning!');
     console.log(proxyReq);
     return proxyReq;
+  },
+
+  intercept: function(rsp, data, req, res, callback) {
+    // rsp - original response from the target
+    //data = JSON.parse(data.toString('utf8'));
+    console.log("Sending response");
+    console.log(req.path);
+    //console.log(data);
+    //console.log(JSON.stringify(data));
+    mydata = data; // JSON.stringify(data)?
+    callback(null, mydata);
   }
 }));
 
