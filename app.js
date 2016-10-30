@@ -5,8 +5,18 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var proxy = require('express-http-proxy');
+var querystring = require('querystring');
+var firebase = require("firebase");
 
 var routes = require('./routes/index');
+
+
+firebase.initializeApp({
+  serviceAccount: "puppymail-keys.json",
+  databaseURL: "https://puppemail-eeeed.firebaseio.com"
+});
+
+
 
 var allowCrossDomain = function(req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
@@ -14,6 +24,22 @@ var allowCrossDomain = function(req, res, next) {
     res.header('Access-Control-Allow-Headers', 'Content-Type');
 
     next();
+}
+
+function postDataToMap(postData) {
+
+  let postMap = {};
+
+  let replacer = function (match, key, joiner, value) {
+    postMap[key] = value;
+    return match;
+  };
+
+  postData.replace(
+    new RegExp('([^?=&]+)(=([^&]*))?', 'g'), replacer);
+
+  return postMap;
+
 }
 
 
@@ -49,11 +75,28 @@ app.use('/proxy/getpocket', proxy('https://getpocket.com/', {
   intercept: function(rsp, data, req, res, callback) {
     // rsp - original response from the target
     //data = JSON.parse(data.toString('utf8'));
+
+    mydata = data; // JSON.stringify(data)?
     console.log("Sending response");
     console.log(req.path);
-    //console.log(data);
+
+    if (req.path == '/v3/oauth/authorize') {
+      mydata = mydata.toString('utf8');
+      //let postData = postDataToMap(mydata);
+      let postData = querystring.parse(mydata);
+
+      if (postData["username"]) {
+          var username = postData["username"]; 
+          
+          var customToken = firebase.auth().createCustomToken(username);
+          mydata += "&fbToken=" + customToken;
+      }
+      
+    }
+    
     //console.log(JSON.stringify(data));
-    mydata = data; // JSON.stringify(data)?
+    //console.log(data);
+    
     callback(null, mydata);
   }
 }));
