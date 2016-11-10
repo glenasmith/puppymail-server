@@ -86,9 +86,14 @@ app.use('/proxy/getpocket', proxy('https://getpocket.com/', {
       let postData = querystring.parse(mydata);
 
       if (postData["username"]) {
-          var username = postData["username"]; 
+          var username = postData["username"];
+          // Firebase can't contain ".", "#", "$", "/", "[", or "]" 
+          var safeUsername = username.replace(/[\.\/\[\]$#]/g, "-");
+          var additionalClaims = {
+            pocketId: username
+          };
           
-          var customToken = firebase.auth().createCustomToken(username);
+          var customToken = firebase.auth().createCustomToken(safeUsername, additionalClaims);
           mydata += "&fbToken=" + customToken;
       }
       
